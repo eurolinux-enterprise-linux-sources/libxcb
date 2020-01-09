@@ -6,8 +6,8 @@
 #define bootstrap 1
 
 Name:           libxcb
-Version:        1.8.1
-Release:        1%{?dist}
+Version:        1.9.1
+Release:        2%{?dist}
 Summary:        A C binding to the X11 protocol
 
 Group:          System Environment/Libraries
@@ -146,6 +146,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/xcb
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/*.pc
+%{_mandir}/man3/*.3*
 
 %files doc
 %defattr(-,root,root,-)
@@ -158,6 +159,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Apr 29 2014 Adam Jackson <ajax@redhat.com> 1.9.1-2
+- libxcb 1.9.1
+
 * Mon Sep 24 2012 Dave Airlie <airlied@redhat.com> 1.8.1-1
 - libxcb 1.8.1 - needed for mesa 9.0
 
