@@ -6,8 +6,8 @@
 #define bootstrap 1
 
 Name:           libxcb
-Version:        1.9.1
-Release:        3%{?dist}
+Version:        1.11
+Release:        2%{?dist}
 Summary:        A C binding to the X11 protocol
 
 Group:          System Environment/Libraries
@@ -21,7 +21,8 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 # the pkgconfig file so libs that link against libxcb know this...
 Source1:	pthread-stubs.pc.in
 Source2:	http://xcb.freedesktop.org/dist/xpyb-%{xpyb_version}.tar.bz2 
-Patch1:		libxcb-expose-64-bit-sequence-numbers-for-XLib.patch
+
+Patch0:		0001-expose-64-bit-sequence-numbers-for-XLib.patch
 
 BuildRequires:  autoconf automake libtool pkgconfig
 BuildRequires:  doxygen
@@ -71,7 +72,7 @@ Python bindings for %{name}.
 
 %prep
 %setup -q -b2
-%patch1 -p1 -b .64bit-seqno
+%patch0 -p1
 
 %if !0%{?bootstrap}
 pushd ../xpyb-%{xpyb_version}
@@ -123,7 +124,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libxcb-damage.so.0*
 %{_libdir}/libxcb-dpms.so.0*
 %{_libdir}/libxcb-dri2.so.0*
+%{_libdir}/libxcb-dri3.so.0*
 %{_libdir}/libxcb-glx.so.0*
+%{_libdir}/libxcb-present.so.0*
 %{_libdir}/libxcb-randr.so.0*
 %{_libdir}/libxcb-record.so.0*
 %{_libdir}/libxcb-render.so.0*
@@ -131,11 +134,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libxcb-screensaver.so.0*
 %{_libdir}/libxcb-shape.so.0*
 %{_libdir}/libxcb-shm.so.0*
-%{_libdir}/libxcb-sync.so.0*
+%{_libdir}/libxcb-sync.so.1*
 %{_libdir}/libxcb-xevie.so.0*
 %{_libdir}/libxcb-xf86dri.so.0*
 %{_libdir}/libxcb-xfixes.so.0*
 %{_libdir}/libxcb-xinerama.so.0*
+%{_libdir}/libxcb-xkb.so.1*
 %{_libdir}/libxcb-xselinux.so.0*
 %{_libdir}/libxcb-xtest.so.0*
 %{_libdir}/libxcb-xv.so.0*
@@ -160,6 +164,12 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Nov 10 2015 Adam Jackson <ajax@redhat.com> 1.11-2
+- Restore 64bit seqno patch
+
+* Thu Nov 05 2015 Adam Jackson <ajax@redhat.com> 1.11-1
+- libxcb 1.11
+
 * Tue May 12 2015 Olivier Fourdan <ofourdan@redhat.com> 1.9.1-3
 - Add 64bit sequence number API for Xlib
 

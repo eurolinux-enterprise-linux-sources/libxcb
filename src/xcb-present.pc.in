@@ -3,9 +3,9 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: XCB RandR
-Description: XCB RandR Extension
+Name: XCB Present
+Description: XCB Present Extension
 Version: @PACKAGE_VERSION@
-Requires: xcb xcb-render
-Libs: -L${libdir} -lxcb-randr
+Requires: xcb xcb-randr xcb-xfixes xcb-sync
+Libs: -L${libdir} -lxcb-present
 Cflags: -I${includedir}
