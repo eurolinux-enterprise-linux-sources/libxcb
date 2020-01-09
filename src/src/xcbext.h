@@ -68,19 +68,106 @@ enum xcb_send_request_flags_t {
  *
  * This function sends a new request to the X server. The data of the request is
  * given as an array of @c iovecs in the @p vector argument. The length of that
- * array and the neccessary management information are given in the @p request
+ * array and the necessary management information are given in the @p request
  * argument.
  *
  * When this function returns, the request might or might not be sent already.
  * Use xcb_flush() to make sure that it really was sent.
  *
- * Please note that this function is not the prefered way for sending requests.
+ * Please note that this function is not the preferred way for sending requests.
  * It's better to use the generated wrapper functions.
  *
  * Please note that xcb might use index -1 and -2 of the @p vector array internally,
  * so they must be valid!
  */
 unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vector, const xcb_protocol_request_t *request);
+
+/**
+ * @brief Send a request to the server.
+ * @param c: The connection to the X server.
+ * @param flags: A combination of flags from the xcb_send_request_flags_t enumeration.
+ * @param vector: Data to send; must have two iovecs before start for internal use.
+ * @param request: Information about the request to be sent.
+ * @param num_fds: Number of additional file descriptors to send to the server
+ * @param fds: Additional file descriptors that should be send to the server.
+ * @return The request's sequence number on success, 0 otherwise.
+ *
+ * This function sends a new request to the X server. The data of the request is
+ * given as an array of @c iovecs in the @p vector argument. The length of that
+ * array and the necessary management information are given in the @p request
+ * argument.
+ *
+ * If @p num_fds is non-zero, @p fds points to an array of file descriptors that
+ * will be sent to the X server along with this request. After this function
+ * returns, all file descriptors sent are owned by xcb and will be closed
+ * eventually.
+ *
+ * When this function returns, the request might or might not be sent already.
+ * Use xcb_flush() to make sure that it really was sent.
+ *
+ * Please note that this function is not the preferred way for sending requests.
+ *
+ * Please note that xcb might use index -1 and -2 of the @p vector array internally,
+ * so they must be valid!
+ */
+unsigned int xcb_send_request_with_fds(xcb_connection_t *c, int flags, struct iovec *vector,
+                const xcb_protocol_request_t *request, unsigned int num_fds, int *fds);
+
+/**
+ * @brief Send a request to the server, with 64-bit sequence number returned.
+ * @param c: The connection to the X server.
+ * @param flags: A combination of flags from the xcb_send_request_flags_t enumeration.
+ * @param vector: Data to send; must have two iovecs before start for internal use.
+ * @param request: Information about the request to be sent.
+ * @return The request's sequence number on success, 0 otherwise.
+ *
+ * This function sends a new request to the X server. The data of the request is
+ * given as an array of @c iovecs in the @p vector argument. The length of that
+ * array and the necessary management information are given in the @p request
+ * argument.
+ *
+ * When this function returns, the request might or might not be sent already.
+ * Use xcb_flush() to make sure that it really was sent.
+ *
+ * Please note that this function is not the preferred way for sending requests.
+ * It's better to use the generated wrapper functions.
+ *
+ * Please note that xcb might use index -1 and -2 of the @p vector array internally,
+ * so they must be valid!
+ */
+uint64_t xcb_send_request64(xcb_connection_t *c, int flags, struct iovec *vector, const xcb_protocol_request_t *request);
+
+/**
+ * @brief Send a request to the server, with 64-bit sequence number returned.
+ * @param c: The connection to the X server.
+ * @param flags: A combination of flags from the xcb_send_request_flags_t enumeration.
+ * @param vector: Data to send; must have two iovecs before start for internal use.
+ * @param request: Information about the request to be sent.
+ * @param num_fds: Number of additional file descriptors to send to the server
+ * @param fds: Additional file descriptors that should be send to the server.
+ * @return The request's sequence number on success, 0 otherwise.
+ *
+ * This function sends a new request to the X server. The data of the request is
+ * given as an array of @c iovecs in the @p vector argument. The length of that
+ * array and the necessary management information are given in the @p request
+ * argument.
+ *
+ * If @p num_fds is non-zero, @p fds points to an array of file descriptors that
+ * will be sent to the X server along with this request. After this function
+ * returns, all file descriptors sent are owned by xcb and will be closed
+ * eventually.
+ *
+ * When this function returns, the request might or might not be sent already.
+ * Use xcb_flush() to make sure that it really was sent.
+ *
+ * Please note that this function is not the preferred way for sending requests.
+ * It's better to use the generated wrapper functions.
+ *
+ * Please note that xcb might use index -1 and -2 of the @p vector array internally,
+ * so they must be valid!
+ */
+uint64_t xcb_send_request_with_fds64(xcb_connection_t *c, int flags, struct iovec *vector,
+                const xcb_protocol_request_t *request, unsigned int num_fds, int *fds);
 
 /**
  * @brief Send a file descriptor to the server in the next call to xcb_send_request.
@@ -90,9 +177,9 @@ unsigned int xcb_send_request(xcb_connection_t *c, int flags, struct iovec *vect
  * After this function returns, the file descriptor given is owned by xcb and
  * will be closed eventually.
  *
- * FIXME: How the heck is this supposed to work in a thread-safe way? There is a
- * race between two threads doing xcb_send_fd(); xcb_send_request(); at the same
- * time.
+ * @deprecated This function cannot be used in a thread-safe way. Two threads
+ * that run xcb_send_fd(); xcb_send_request(); could mix up their file
+ * descriptors. Instead, xcb_send_request_with_fds() should be used.
  */
 void xcb_send_fd(xcb_connection_t *c, int fd);
 
@@ -162,6 +249,21 @@ int xcb_writev(xcb_connection_t *c, struct iovec *vector, int count, uint64_t re
 void *xcb_wait_for_reply(xcb_connection_t *c, unsigned int request, xcb_generic_error_t **e);
 
 /**
+ * @brief Wait for the reply of a given request, with 64-bit sequence number
+ * @param c: The connection to the X server.
+ * @param request: 64-bit sequence number of the request as returned by xcb_send_request64().
+ * @param e: Location to store errors in, or NULL. Ignored for unchecked requests.
+ *
+ * Returns the reply to the given request or returns null in the event of
+ * errors. Blocks until the reply or error for the request arrives, or an I/O
+ * error occurs.
+ *
+ * Unlike its xcb_wait_for_reply() counterpart, the given sequence number is not
+ * automatically "widened" to 64-bit.
+ */
+void *xcb_wait_for_reply64(xcb_connection_t *c, uint64_t request, xcb_generic_error_t **e);
+
+/**
  * @brief Poll for the reply of a given request.
  * @param c: The connection to the X server.
  * @param request: Sequence number of the request as returned by xcb_send_request().
@@ -172,6 +274,21 @@ void *xcb_wait_for_reply(xcb_connection_t *c, unsigned int request, xcb_generic_
  * Checks if the reply to the given request already received. Does not block.
  */
 int xcb_poll_for_reply(xcb_connection_t *c, unsigned int request, void **reply, xcb_generic_error_t **error);
+
+/**
+ * @brief Poll for the reply of a given request, with 64-bit sequence number.
+ * @param c: The connection to the X server.
+ * @param request: 64-bit sequence number of the request as returned by xcb_send_request().
+ * @param reply: Location to store the reply in, must not be NULL.
+ * @param e: Location to store errors in, or NULL. Ignored for unchecked requests.
+ * @return 1 when the reply to the request was returned, else 0.
+ *
+ * Checks if the reply to the given request already received. Does not block.
+ *
+ * Unlike its xcb_poll_for_reply() counterpart, the given sequence number is not
+ * automatically "widened" to 64-bit.
+ */
+int xcb_poll_for_reply64(xcb_connection_t *c, uint64_t request, void **reply, xcb_generic_error_t **error);
 
 /**
  * @brief Don't use this, only needed by the generated code.

@@ -6,8 +6,8 @@
 #define bootstrap 1
 
 Name:           libxcb
-Version:        1.11
-Release:        2%{?dist}
+Version:        1.12
+Release:        4%{?dist}
 Summary:        A C binding to the X11 protocol
 
 Group:          System Environment/Libraries
@@ -22,17 +22,17 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Source1:	pthread-stubs.pc.in
 Source2:	http://xcb.freedesktop.org/dist/xpyb-%{xpyb_version}.tar.bz2 
 
-Patch0:		0001-expose-64-bit-sequence-numbers-for-XLib.patch
-
 BuildRequires:  autoconf automake libtool pkgconfig
 BuildRequires:  doxygen
 BuildRequires:  graphviz
 BuildRequires:  libXau-devel
 BuildRequires:  libxslt
 BuildRequires:	python-devel
-BuildRequires:  xcb-proto >= 1.6
-BuildRequires:  xorg-x11-proto-devel
-BuildRequires:  xorg-x11-util-macros
+BuildRequires:  libtool
+BuildRequires:  pkgconfig
+BuildRequires:  pkgconfig(xau) >= 0.99.2
+BuildRequires:  pkgconfig(xcb-proto) >= 1.12
+BuildRequires:  pkgconfig(xorg-macros) >= 1.18
 %if !0%{?bootstrap}
 BuildRequires:	libxcb-devel
 %endif
@@ -72,7 +72,6 @@ Python bindings for %{name}.
 
 %prep
 %setup -q -b2
-%patch0 -p1
 
 %if !0%{?bootstrap}
 pushd ../xpyb-%{xpyb_version}
@@ -85,7 +84,8 @@ popd
 sed -i 's/pthread-stubs //' configure.ac
 autoreconf -v --install --force
 %configure --disable-static --docdir=%{_datadir}/doc/%{name}-%{version} \
-	   --enable-selinux
+	   --enable-selinux --enable-xinput --enable-xevie \
+	   --enable-xprint
 make %{?_smp_mflags}
 
 %if !0%{?bootstrap}
@@ -139,6 +139,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libxcb-xf86dri.so.0*
 %{_libdir}/libxcb-xfixes.so.0*
 %{_libdir}/libxcb-xinerama.so.0*
+%{_libdir}/libxcb-xinput.so.0*
 %{_libdir}/libxcb-xkb.so.1*
 %{_libdir}/libxcb-xselinux.so.0*
 %{_libdir}/libxcb-xtest.so.0*
@@ -164,6 +165,12 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Jan 19 2017 Benjamin Tissoires <benjamin.tissoires@redhat.com> 1.12-4
+- Re-add back xprint, we already ship it in RHEL
+
+* Thu Jan 19 2017 Benjamin Tissoires <benjamin.tissoires@redhat.com> 1.12-3
+- libxcb 1.12
+
 * Tue Nov 10 2015 Adam Jackson <ajax@redhat.com> 1.11-2
 - Restore 64bit seqno patch
 
