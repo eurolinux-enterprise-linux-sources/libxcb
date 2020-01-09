@@ -7,7 +7,7 @@
 
 Name:           libxcb
 Version:        1.9.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        A C binding to the X11 protocol
 
 Group:          System Environment/Libraries
@@ -21,7 +21,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 # the pkgconfig file so libs that link against libxcb know this...
 Source1:	pthread-stubs.pc.in
 Source2:	http://xcb.freedesktop.org/dist/xpyb-%{xpyb_version}.tar.bz2 
-
+Patch1:		libxcb-expose-64-bit-sequence-numbers-for-XLib.patch
 
 BuildRequires:  autoconf automake libtool pkgconfig
 BuildRequires:  doxygen
@@ -71,6 +71,7 @@ Python bindings for %{name}.
 
 %prep
 %setup -q -b2
+%patch1 -p1 -b .64bit-seqno
 
 %if !0%{?bootstrap}
 pushd ../xpyb-%{xpyb_version}
@@ -159,6 +160,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue May 12 2015 Olivier Fourdan <ofourdan@redhat.com> 1.9.1-3
+- Add 64bit sequence number API for Xlib
+
 * Tue Apr 29 2014 Adam Jackson <ajax@redhat.com> 1.9.1-2
 - libxcb 1.9.1
 
