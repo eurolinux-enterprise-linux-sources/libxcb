@@ -1,14 +1,13 @@
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 Name:       libxcb
-Version:    1.11
-Release:    4%{?dist}
+Version:    1.12
+Release:    1%{?dist}
 Summary:    A C binding to the X11 protocol
 License:    MIT
 URL:        http://xcb.freedesktop.org/
 
 Source0:    http://xcb.freedesktop.org/dist/%{name}-%{version}.tar.bz2
-Patch1:     libxcb-expose-64-bit-sequence-numbers-for-XLib.patch
 
 # This is stolen straight from the pthread-stubs source:
 # http://cgit.freedesktop.org/xcb/pthread-stubs/blob/?id=6900598192bacf5fd9a34619b11328f746a5956d
@@ -20,8 +19,9 @@ BuildRequires:  doxygen
 BuildRequires:  graphviz
 BuildRequires:  libtool
 BuildRequires:  libxslt
+BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(xau) >= 0.99.2
-BuildRequires:  pkgconfig(xcb-proto) >= 1.11
+BuildRequires:  pkgconfig(xcb-proto) >= 1.12
 BuildRequires:  pkgconfig(xorg-macros) >= 1.18
 #BuildRequires:  xorg-x11-proto-devel
 
@@ -32,8 +32,7 @@ threading support, and extensibility.
 
 %package devel
 Summary:    Development files for %{name}
-Requires:   %{name} = %{version}-%{release}
-Requires:   pkgconfig
+Requires:   %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
 The %{name}-devel package contains libraries and header files for developing
@@ -47,19 +46,26 @@ BuildArch:  noarch
 The %{name}-doc package contains documentation for the %{name} library.
 
 %prep
-%setup -q 
-%patch1 -p1 -b .64bit-seqno
+%autosetup -p1
 
 %build
 sed -i 's/pthread-stubs //' configure.ac
-autoreconf -v --install
+# autoreconf -f needed to expunge rpaths
+autoreconf -v -f --install
 %configure \
     --disable-static \
     --docdir=%{_pkgdocdir} \
     --enable-selinux \
     --enable-xkb \
     --enable-xinput \
-    --disable-xprint
+    --enable-xevie \
+    --disable-xprint \
+    --disable-silent-rules
+
+# Remove rpath from libtool (extra insurance if autoreconf is ever dropped)
+sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+
 make %{?_smp_mflags}
 
 %install
@@ -112,8 +118,31 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 %{_pkgdocdir}
 
 %changelog
-* Mon Jun 08 2015 Olivier Fourdan <ofourdan@redhat.com> 1.11-4
-- Add 64bit sequence number API for Xlib (#1206245)
+* Wed May 18 2016 Adam Jackson <ajax@redhat.com> - 1.12-1
+- libxcb 1.12
+
+* Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 1.11.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
+* Mon Sep 21 2015 Adam Jackson <ajax@redhat.com> 1.11.1-1
+- libxcb 1.11.1
+
+* Thu Jun 25 2015 Rex Dieter <rdieter@fedoraproject.org> 1.11-8
+- followup fix for thread deadlocks (#1193742, fdo#84252)
+
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.11-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
+* Fri Jun 12 2015 Rex Dieter <rdieter@fedoraproject.org> 1.11-6
+- pull in (partial?) upstream fix for deadlocks (#1193742, fdo#84252)
+
+* Wed May 20 2015 Rex Dieter <rdieter@fedoraproject.org> - 1.11-5
+- fix rpath harder (#1136546)
+- %%build: --disable-silent-rules
+
+* Tue May 19 2015 Rex Dieter <rdieter@fedoraproject.org> - 1.11-4
+- fix fpath (use autoreconf -f)
+- -devel: tighten deps via %%{?_isa}, drop Requires: pkgconfig (add explicit BR: pkgconfig)
 
 * Thu Jan 08 2015 Simone Caronni <negativo17@gmail.com> - 1.11-3
 - Clean up SPEC file, fix rpmlint warnings.
