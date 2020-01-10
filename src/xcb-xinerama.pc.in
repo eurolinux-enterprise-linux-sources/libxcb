@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: XCB Xinerama
 Description: XCB Xinerama Extension
 Version: @PACKAGE_VERSION@
-Requires.private: xcb
+Requires: xcb
 Libs: -L${libdir} -lxcb-xinerama
 Cflags: -I${includedir}

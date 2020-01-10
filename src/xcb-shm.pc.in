@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: XCB Shm
 Description: XCB Shm Extension
 Version: @PACKAGE_VERSION@
-Requires.private: xcb
+Requires: xcb
 Libs: -L${libdir} -lxcb-shm
 Cflags: -I${includedir}

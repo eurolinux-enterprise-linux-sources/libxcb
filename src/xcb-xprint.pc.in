@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: XCB Xprint
 Description: XCB Xprint Extension
 Version: @PACKAGE_VERSION@
-Requires.private: xcb
+Requires: xcb
 Libs: -L${libdir} -lxcb-xprint
 Cflags: -I${includedir}

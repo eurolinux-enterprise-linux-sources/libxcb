@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: XCB SELinux
 Description: XCB SELinux Extension
 Version: @PACKAGE_VERSION@
-Requires.private: xcb
+Requires: xcb
 Libs: -L${libdir} -lxcb-xselinux
 Cflags: -I${includedir}

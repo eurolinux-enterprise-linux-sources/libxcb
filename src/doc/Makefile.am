@@ -8,9 +8,7 @@ xkb_issues
 
 docdirs = $(srcdir)/tutorial
 
-if ENABLE_DEVEL_DOCS
-if HAVE_DOXYGEN
-if HAVE_DOT
+if BUILD_DOCS
 
 docdirs += manual
 
@@ -22,8 +20,6 @@ manual:
 clean-local:
 	rm -rf manual/
 
-endif
-endif
 endif
 
 all-local: $(docdirs)
