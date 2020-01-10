@@ -1,13 +1,13 @@
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
 Name:       libxcb
-Version:    1.12
+Version:    1.13
 Release:    1%{?dist}
 Summary:    A C binding to the X11 protocol
 License:    MIT
-URL:        http://xcb.freedesktop.org/
+URL:        https://xcb.freedesktop.org/
 
-Source0:    http://xcb.freedesktop.org/dist/%{name}-%{version}.tar.bz2
+Source0:    https://xcb.freedesktop.org/dist/%{name}-%{version}.tar.bz2
 
 # This is stolen straight from the pthread-stubs source:
 # http://cgit.freedesktop.org/xcb/pthread-stubs/blob/?id=6900598192bacf5fd9a34619b11328f746a5956d
@@ -118,6 +118,9 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 %{_pkgdocdir}
 
 %changelog
+* Tue Apr 24 2018 Adam Jackson <ajax@redhat.com> - 1.13-1
+- libxcb 1.13
+
 * Wed May 18 2016 Adam Jackson <ajax@redhat.com> - 1.12-1
 - libxcb 1.12
 
