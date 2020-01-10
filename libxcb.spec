@@ -1,6 +1,6 @@
 Name:           libxcb
 Version:        1.9
-Release:        3%{?dist}
+Release:        5%{?dist}
 Summary:        A C binding to the X11 protocol
 
 Group:          System Environment/Libraries
@@ -111,6 +111,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/doc/%{name}-%{version}
 
 %changelog
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 1.9-5
+- Mass rebuild 2014-01-24
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 1.9-4
+- Mass rebuild 2013-12-27
+
 * Fri May 24 2013 Peter Hutterer <peter.hutterer@redhat.com> 1.9-3
 - Fix integer overflow in read_packet (CVE-2013-2064)
 
